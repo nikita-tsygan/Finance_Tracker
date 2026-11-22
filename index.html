@@ -141,6 +141,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      position: relative;
+      z-index: 2;
     }
     .brand { display: flex; align-items: center; gap: 10px; }
     .brand-mark {
@@ -547,6 +549,42 @@
     .settings-label strong { display: block; }
     .settings-label span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
     .theme-swatches { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px; }
+    .theme-style-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+    .theme-style-button {
+      min-width: 0;
+      min-height: 100px;
+      display: grid;
+      grid-template-columns: 38px minmax(0, 1fr);
+      grid-template-rows: auto auto;
+      align-content: center;
+      align-items: center;
+      column-gap: 11px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface-2);
+      color: var(--text);
+      text-align: left;
+      transition: border-color .2s, background .2s, transform .2s, box-shadow .2s;
+    }
+    .theme-style-button[aria-pressed="true"] {
+      border-color: var(--primary);
+      background: var(--primary-soft);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 6px 20px rgba(var(--accent-rgb), .12);
+    }
+    .theme-style-icon {
+      grid-row: 1 / 3;
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: rgba(var(--accent-rgb), .14);
+      color: var(--primary);
+      font-size: 19px;
+    }
+    .theme-style-button strong { font-size: 14px; }
+    .theme-style-button small { margin-top: 3px; color: var(--muted); font-size: 11px; }
     .theme-swatch {
       width: 42px;
       height: 42px;
@@ -557,6 +595,7 @@
       box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 3px 12px rgba(0,0,0,.2);
     }
     .theme-swatch.active { outline: 2px solid var(--text); outline-offset: 3px; }
+    .theme-swatch:disabled { cursor: not-allowed; filter: grayscale(.45); opacity: .48; }
     .theme-color-picker {
       flex: 0 0 56px;
       width: 56px !important;
@@ -866,6 +905,8 @@
         font-size: 15px;
       }
       .menu-action[data-menu-settings] { grid-column: 1 / -1; min-height: 64px; }
+      .theme-style-options { grid-template-columns: 1fr; }
+      .theme-style-button { min-height: 78px; }
       .operation-row > * { min-width: 0; }
       .operation-name,
       .operation-detail { overflow-wrap: anywhere; }
@@ -1027,6 +1068,160 @@
       background: linear-gradient(90deg, var(--accent-dark), var(--accent-light));
       animation: splash-progress 1.1s ease-in-out infinite;
     }
+    @keyframes holiday-snowfall {
+      from { background-position: 0 -220px, 30px -360px, -20px -500px; }
+      to { background-position: 35px 0, -25px 0, 40px 0; }
+    }
+    @keyframes holiday-snowman-bob {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-3px) rotate(2deg); }
+    }
+    @keyframes holiday-lights-glow {
+      0%, 100% { opacity: .58; filter: drop-shadow(0 0 2px currentColor); }
+      50% { opacity: 1; filter: drop-shadow(0 0 7px currentColor); }
+    }
+    .holiday-lights {
+      display: none;
+      position: absolute;
+      z-index: 1;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 40px;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .holiday-lights svg { display: block; width: 100%; height: 100%; }
+    .holiday-lights .wire { fill: none; stroke: rgba(209, 224, 218, .48); stroke-width: 1.5; }
+    .holiday-lights .stem { stroke: rgba(209, 224, 218, .56); stroke-width: 1.5; }
+    .holiday-lights .bulb { animation: holiday-lights-glow 2.4s ease-in-out infinite; }
+    .holiday-lights .bulb:nth-of-type(2n) { animation-delay: .6s; }
+    .holiday-lights .bulb:nth-of-type(3n) { animation-delay: 1.2s; }
+    .holiday-lights .bulb-gold { color: #f3cb83; fill: #f3cb83; }
+    .holiday-lights .bulb-berry { color: #db9996; fill: #db9996; }
+    .holiday-lights .bulb-pine { color: #9dc8ad; fill: #9dc8ad; }
+    .holiday-lights .bulb-ice { color: #c7e9ef; fill: #c7e9ef; }
+    .holiday-snowman {
+      display: none;
+      width: 48px;
+      height: 54px;
+      margin-right: 2px;
+      filter: drop-shadow(0 4px 10px rgba(181, 224, 229, .26));
+      transform-origin: 50% 100%;
+    }
+    .holiday-snowman svg { display: block; width: 100%; height: 100%; overflow: visible; }
+    :root[data-theme-style="new-year"] .holiday-snowman {
+      display: block;
+      animation: holiday-snowman-bob 3.2s ease-in-out infinite;
+    }
+    :root[data-theme-style="new-year"] {
+      --bg: #11191c;
+      --surface: rgba(28, 42, 46, .84);
+      --surface-2: rgba(226, 241, 242, .07);
+      --text: #f0f7f6;
+      --muted: #b6c8c9;
+      --line: rgba(207, 228, 230, .18);
+      --primary: #c7dddd !important;
+      --primary-dark: #91b5ba !important;
+      --primary-soft: rgba(166, 205, 210, .16) !important;
+      --accent-rgb: 176, 215, 220 !important;
+      --accent-light: #e4f2f0 !important;
+      --accent-dark: #55777c !important;
+      --accent-contrast: #172326 !important;
+      --success: #b2d1bd;
+      --success-soft: rgba(151, 196, 173, .16);
+    }
+    :root[data-theme-style="new-year"] body {
+      background:
+        radial-gradient(ellipse at 2% 18%, rgba(201, 111, 104, .1), transparent 24rem),
+        radial-gradient(ellipse at 98% 56%, rgba(233, 190, 111, .09), transparent 25rem),
+        radial-gradient(ellipse at 48% 88%, rgba(117, 165, 135, .08), transparent 28rem),
+        radial-gradient(ellipse at 10% 4%, rgba(162, 202, 209, .17), transparent 34rem),
+        radial-gradient(ellipse at 90% 30%, rgba(104, 151, 151, .15), transparent 32rem),
+        radial-gradient(ellipse at 50% 100%, rgba(220, 236, 229, .08), transparent 36rem),
+        var(--bg);
+      background-attachment: fixed;
+    }
+    :root[data-theme-style="new-year"] .holiday-lights { display: block; }
+    :root[data-theme-style="new-year"] .brand-name {
+      text-shadow: 0 0 18px rgba(220, 239, 229, .3);
+    }
+    :root[data-theme-style="new-year"] .holiday-snowman .snowman-scarf {
+      stroke: #bd7774;
+    }
+    :root[data-theme-style="new-year"] .holiday-snowman .snowman-scarf-tail {
+      fill: #bd7774;
+      stroke: #d7a09a;
+    }
+    :root[data-theme-style="new-year"] .segmented button.active {
+      background: linear-gradient(145deg, #718f7e, #3f6655);
+      color: #f5faf6;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 4px 14px rgba(48, 92, 67, .28);
+    }
+    :root[data-theme-style="new-year"] body::before {
+      content: "";
+      position: fixed;
+      z-index: 9;
+      inset: 0;
+      pointer-events: none;
+      opacity: .35;
+      background-image:
+        radial-gradient(2px 2px at 30px 45px, rgba(255,255,255,.88) 98%, transparent),
+        radial-gradient(1.5px 1.5px at 110px 90px, rgba(220,242,244,.78) 98%, transparent),
+        radial-gradient(2px 2px at 175px 25px, rgba(255,255,255,.72) 98%, transparent);
+      background-size: 220px 220px, 270px 270px, 330px 330px;
+      animation: holiday-snowfall 18s linear infinite;
+    }
+    :root[data-theme-style="new-year"] .topbar {
+      background: rgba(20, 34, 38, .78);
+      border-bottom-color: rgba(207, 228, 230, .2);
+    }
+    :root[data-theme-style="new-year"] .account-card,
+    :root[data-theme-style="new-year"] .panel,
+    :root[data-theme-style="new-year"] .menu-action,
+    :root[data-theme-style="new-year"] .period-tabs,
+    :root[data-theme-style="new-year"] .segmented {
+      background:
+        linear-gradient(145deg, rgba(222,241,241,.1), rgba(255,255,255,.018) 48%, rgba(132,177,181,.08)),
+        rgba(27, 42, 46, .86);
+      border-color: rgba(207, 228, 230, .19);
+    }
+    :root[data-theme-style="new-year"] .summary-card {
+      background:
+        radial-gradient(ellipse at 82% 0%, rgba(230,249,248,.36), transparent 42%),
+        linear-gradient(125deg, rgba(93,129,135,.98) 0%, rgba(55,83,91,.98) 52%, rgba(37,64,69,.98) 100%);
+      border-color: rgba(212, 237, 237, .42);
+      box-shadow: 0 22px 48px rgba(39, 70, 76, .3), inset 0 1px 0 rgba(255,255,255,.34);
+    }
+    :root[data-theme-style="new-year"] .summary-card::after {
+      background: radial-gradient(circle, rgba(234,250,249,.25), rgba(220,241,240,.04) 65%);
+    }
+    :root[data-theme-style="new-year"] .bottom-nav {
+      background: rgba(26, 42, 46, .86);
+      border-color: rgba(207, 228, 230, .2);
+    }
+    :root[data-theme-style="new-year"] .nav-item.active {
+      color: #f4fbfa;
+      background: linear-gradient(145deg, rgba(180,216,219,.28), rgba(104,151,154,.2));
+      box-shadow: inset 0 1px 0 rgba(235,252,251,.22), 0 4px 14px rgba(0,0,0,.16);
+    }
+    :root[data-theme-style="new-year"] .theme-style-button[data-theme-style="new-year"] .theme-style-icon {
+      background: linear-gradient(145deg, rgba(210,238,238,.3), rgba(105,152,157,.28));
+      color: #e4f2f0;
+    }
+    :root[data-theme-style="new-year"] .btn-primary {
+      background: linear-gradient(135deg, #deeeee, #8eb3b7);
+      color: #172326;
+      box-shadow: 0 8px 20px rgba(111, 157, 162, .23), inset 0 1px 0 rgba(255,255,255,.4);
+    }
+    :root[data-theme-style="new-year"] .btn-primary:hover {
+      background: linear-gradient(135deg, #edf8f7, #a5c7c9);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      :root[data-theme-style="new-year"] body::before { animation: none; }
+      :root[data-theme-style="new-year"] .holiday-snowman { animation: none; }
+      :root[data-theme-style="new-year"] .holiday-lights .bulb { animation: none; }
+    }
   </style>
 </head>
 <body>
@@ -1046,6 +1241,18 @@
   </div>
   <div class="app-shell" aria-hidden="true">
     <header class="topbar">
+      <div class="holiday-lights" aria-hidden="true">
+        <svg viewBox="0 0 1440 42" preserveAspectRatio="none">
+          <path class="wire" d="M0 0C120 0 120 28 240 28S360 0 480 0S600 28 720 28S840 0 960 0S1080 28 1200 28S1320 0 1440 0"/>
+          <path class="stem" d="M120 15v7m240-7v7m240-7v7m240-7v7m240-7v7m240-7v7"/>
+          <circle class="bulb bulb-gold" cx="120" cy="27" r="8"/>
+          <circle class="bulb bulb-berry" cx="360" cy="27" r="8"/>
+          <circle class="bulb bulb-pine" cx="600" cy="27" r="8"/>
+          <circle class="bulb bulb-ice" cx="840" cy="27" r="8"/>
+          <circle class="bulb bulb-gold" cx="1080" cy="27" r="8"/>
+          <circle class="bulb bulb-berry" cx="1320" cy="27" r="8"/>
+        </svg>
+      </div>
       <div class="container topbar-inner">
         <div class="brand">
           <div class="brand-mark" aria-hidden="true">
@@ -1056,6 +1263,23 @@
             </svg>
           </div>
           <div class="brand-name">Мои финансы</div>
+        </div>
+        <div class="holiday-snowman" aria-hidden="true">
+          <svg viewBox="0 0 64 72" fill="none">
+            <path d="M17 42 8 36m9 10L7 48m40-6 9-6m-9 10 10 2" stroke="#9bbdc0" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="32" cy="47" r="17" fill="#eaf4f2" stroke="#c7dddd" stroke-width="1.5"/>
+            <circle cx="32" cy="22" r="12" fill="#f3f8f6" stroke="#c7dddd" stroke-width="1.5"/>
+            <path d="M20 17h24l-3-7H23l-3 7Z" fill="#344b50" stroke="#9bbdc0" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M21 17h22" stroke="#d4e5e3" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="28" cy="22" r="1.35" fill="#344b50"/>
+            <circle cx="36" cy="22" r="1.35" fill="#344b50"/>
+            <path d="m32 25 8 2-8 2v-4Z" fill="#d59669"/>
+            <path d="M27 29c1.4 1.5 3.1 2.2 5 2.2s3.6-.7 5-2.2" stroke="#829fa1" stroke-width="1.5" stroke-linecap="round"/>
+            <path class="snowman-scarf" d="M21 37c3.2 2.5 6.8 3.8 11 3.8S39.8 38.5 43 36" stroke="#9bbdc0" stroke-width="5" stroke-linecap="round"/>
+            <path class="snowman-scarf-tail" d="m38 39 5 13-5 2-4-13" fill="#bfd6d7" stroke="#eaf4f2" stroke-width="1.2" stroke-linejoin="round"/>
+            <circle cx="32" cy="48" r="1.5" fill="#789396"/>
+            <circle cx="32" cy="55" r="1.5" fill="#789396"/>
+          </svg>
         </div>
       </div>
     </header>
@@ -1214,8 +1438,23 @@
           <div><h1>Настройки</h1><p>Данные приложения</p></div>
         </div>
         <div class="panel">
+          <h2 class="panel-title">Стиль интерфейса</h2>
+          <div class="theme-style-options" role="group" aria-label="Стиль интерфейса">
+            <button type="button" class="theme-style-button" data-theme-style="classic" aria-pressed="true">
+              <span class="theme-style-icon">◒</span>
+              <strong>Сдержанный</strong>
+              <small>Спокойные оттенки</small>
+            </button>
+            <button type="button" class="theme-style-button" data-theme-style="new-year" aria-pressed="false">
+              <span class="theme-style-icon">❄</span>
+              <strong>Новый год</strong>
+              <small>Снег, огни и новогоднее настроение</small>
+            </button>
+          </div>
+        </div>
+        <div class="panel">
           <h2 class="panel-title">Цвет интерфейса</h2>
-          <p class="history-detail" style="margin-top:-8px;margin-bottom:14px">Выберите акцентный цвет приложения.</p>
+          <p id="theme-color-note" class="history-detail" style="margin-top:-8px;margin-bottom:14px">Выберите акцентный цвет приложения.</p>
           <div id="theme-swatches" class="theme-swatches" role="group" aria-label="Готовые цвета интерфейса">
             <button type="button" class="theme-swatch" data-theme-color="#aab394" style="--swatch-color:#aab394" aria-label="Шалфейный" title="Шалфейный"></button>
             <button type="button" class="theme-swatch" data-theme-color="#bd8267" style="--swatch-color:#bd8267" aria-label="Терракотовый" title="Терракотовый"></button>
@@ -1403,7 +1642,8 @@
               incomeCategories: Array.isArray(saved.incomeCategories) ? saved.incomeCategories : DEFAULT_INCOME_CATEGORIES,
               settings: {
                 themeColor: normalizeThemeColor(saved.settings?.themeColor),
-                hideBalances: saved.settings?.hideBalances === true
+                hideBalances: saved.settings?.hideBalances === true,
+                themeStyle: saved.settings?.themeStyle === 'new-year' ? 'new-year' : 'classic'
               }
             };
           }
@@ -1414,7 +1654,7 @@
           operations: [],
           expenseCategories: DEFAULT_EXPENSE_CATEGORIES,
           incomeCategories: DEFAULT_INCOME_CATEGORIES,
-          settings: { themeColor: DEFAULT_THEME_COLOR, hideBalances: false }
+          settings: { themeColor: DEFAULT_THEME_COLOR, hideBalances: false, themeStyle: 'classic' }
         };
       }
 
@@ -1470,6 +1710,8 @@
         const rgb = colorRgb(normalized);
         const luminance = relativeLuminance(rgb);
         const root = document.documentElement;
+        const themeStyle = state.settings.themeStyle === 'new-year' ? 'new-year' : 'classic';
+        root.dataset.themeStyle = themeStyle;
         root.style.setProperty('--primary', normalized);
         root.style.setProperty('--primary-dark', rgbHex(mixColor(rgb, .2, 0)));
         root.style.setProperty('--primary-soft', `rgba(${rgb.join(', ')}, .15)`);
@@ -1477,16 +1719,31 @@
         root.style.setProperty('--accent-light', rgbHex(mixColor(rgb, .2, 255)));
         root.style.setProperty('--accent-dark', rgbHex(mixColor(rgb, .25, 0)));
         root.style.setProperty('--accent-contrast', luminance > .42 ? '#171912' : '#ffffff');
-        document.getElementById('theme-color-picker').value = normalized;
+        const colorPicker = document.getElementById('theme-color-picker');
+        colorPicker.value = normalized;
+        colorPicker.disabled = themeStyle === 'new-year';
+        document.getElementById('theme-color-note').textContent = themeStyle === 'new-year'
+          ? 'В новогоднем стиле используется отдельная морозная палитра.'
+          : 'Выберите акцентный цвет приложения.';
         document.querySelectorAll('[data-theme-color]').forEach(button => {
           const selected = button.dataset.themeColor === normalized;
           button.classList.toggle('active', selected);
           button.setAttribute('aria-pressed', String(selected));
+          button.disabled = themeStyle === 'new-year';
+        });
+        document.querySelectorAll('[data-theme-style]').forEach(button => {
+          button.setAttribute('aria-pressed', String(button.dataset.themeStyle === themeStyle));
         });
       }
 
       function setThemeColor(color) {
         state.settings.themeColor = normalizeThemeColor(color);
+        applyThemeColor(state.settings.themeColor);
+        saveState();
+      }
+
+      function setThemeStyle(style) {
+        state.settings.themeStyle = style === 'new-year' ? 'new-year' : 'classic';
         applyThemeColor(state.settings.themeColor);
         saveState();
       }
@@ -2161,6 +2418,12 @@
       document.getElementById('theme-color-picker').addEventListener('input', event => {
         setThemeColor(event.target.value);
       });
+      document.querySelectorAll('[data-theme-style]').forEach(button => {
+        button.addEventListener('click', () => {
+          setThemeStyle(button.dataset.themeStyle);
+          toast(button.dataset.themeStyle === 'new-year' ? 'Новогодний стиль включён' : 'Сдержанный стиль включён');
+        });
+      });
       document.getElementById('toggle-balances').addEventListener('click', () => {
         state.settings.hideBalances = !state.settings.hideBalances;
         saveState();
@@ -2249,7 +2512,8 @@
             incomeCategories: Array.isArray(imported.incomeCategories) ? imported.incomeCategories : DEFAULT_INCOME_CATEGORIES,
             settings: {
               themeColor: normalizeThemeColor(imported.settings?.themeColor),
-              hideBalances: imported.settings?.hideBalances === true
+              hideBalances: imported.settings?.hideBalances === true,
+              themeStyle: imported.settings?.themeStyle === 'new-year' ? 'new-year' : 'classic'
             }
           };
           applyThemeColor(state.settings.themeColor);
