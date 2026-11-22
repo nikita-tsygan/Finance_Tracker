@@ -2033,6 +2033,7 @@
         const [start, end] = periodRange();
         return state.operations.filter(operation => {
           if (operation.type !== type) return false;
+          if (accountById(operation.accountId)?.excludeFromTotal) return false;
           const date = new Date(`${operation.date}T12:00:00`);
           return date >= start && date < end;
         });
@@ -2092,7 +2093,11 @@
           .map(item => {
             const category = categoryById(item.categoryId);
             const percent = total ? item.amount / total * 100 : 0;
-            const operation = state.operations.find(value => value.categoryId === item.categoryId);
+            const operation = state.operations.find(value =>
+              value.categoryId === item.categoryId &&
+              value.type === type &&
+              !accountById(value.accountId)?.excludeFromTotal
+            );
             const account = accountById(operation?.accountId);
             return `
               <button type="button" class="breakdown-row" data-category-detail="${item.categoryId}" data-detail-type="${type}">
