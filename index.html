@@ -670,6 +670,18 @@
     .chart-card { min-height: 360px; }
     .chart-wrap { position: relative; height: 220px; max-width: 300px; margin: 8px auto 12px; }
     .chart-wrap canvas { width: 100% !important; height: 100% !important; }
+    .chart-empty {
+      position: absolute;
+      inset: 0;
+      display: none;
+      place-items: center;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      pointer-events: none;
+    }
+    .chart-empty.visible { display: grid; }
     .breakdown { display: flex; flex-direction: column; }
     .breakdown-row { width: 100%; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--text); display: grid; grid-template-columns: 12px minmax(0,1fr) auto; align-items: center; gap: 9px; padding: 11px 4px; text-align: left; }
     .breakdown-row:last-child { border-bottom: 0; }
@@ -1305,12 +1317,12 @@
         <div class="stats-grid">
           <div class="panel chart-card">
             <h2 class="panel-title">Расходы</h2>
-            <div class="chart-wrap"><canvas id="expense-chart"></canvas></div>
+            <div class="chart-wrap"><canvas id="expense-chart"></canvas><div id="expense-chart-empty" class="chart-empty">Нет операций за период</div></div>
             <div id="expense-breakdown" class="breakdown"></div>
           </div>
           <div class="panel chart-card">
             <h2 class="panel-title">Доходы</h2>
-            <div class="chart-wrap"><canvas id="income-chart"></canvas></div>
+            <div class="chart-wrap"><canvas id="income-chart"></canvas><div id="income-chart-empty" class="chart-empty">Нет операций за период</div></div>
             <div id="income-breakdown" class="breakdown"></div>
           </div>
         </div>
@@ -2327,8 +2339,17 @@
       }
 
       function renderChart(canvasId, chartRef, items, type) {
-        if (typeof Chart === 'undefined') return chartRef;
         if (chartRef) chartRef.destroy();
+        const canvas = document.getElementById(canvasId);
+        const empty = document.getElementById(canvasId.replace('-chart', '-chart-empty'));
+        if (!items.length) {
+          canvas.style.display = 'none';
+          empty?.classList.add('visible');
+          return null;
+        }
+        canvas.style.display = 'block';
+        empty?.classList.remove('visible');
+        if (typeof Chart === 'undefined') return chartRef;
         const categories = type === 'expense' ? state.expenseCategories : state.incomeCategories;
         const labels = items.map(item => categoryById(item.categoryId)?.name || 'Без категории');
         const colors = items.map(item => categoryById(item.categoryId)?.color || '#738096');
@@ -2360,7 +2381,7 @@
       function renderBreakdown(containerId, items, type) {
         const container = document.getElementById(containerId);
         if (!items.length) {
-          container.innerHTML = `<div class="empty" style="padding:24px 8px">Нет операций за период</div>`;
+          container.innerHTML = '';
           return;
         }
         const total = items.reduce((sum, item) => sum + item.amount, 0);
