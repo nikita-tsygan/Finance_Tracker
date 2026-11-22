@@ -623,6 +623,7 @@
     }
 
     .stats-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 14px; }
+    .stats-account-filter { flex: 1 1 190px; min-width: 180px; max-width: 280px; }
     .period-tabs { display: flex; gap: 6px; padding: 4px; border: 1px solid var(--line); border-radius: 13px; background: var(--surface); }
     .period-tabs button { border: 0; border-radius: 9px; min-height: 38px; padding: 8px 11px; background: transparent; color: var(--muted); font-weight: 750; }
     .period-tabs button.active { color: white; background: var(--primary); }
@@ -670,6 +671,7 @@
       .stats-controls { align-items: stretch; }
       .period-tabs { width: 100%; overflow-x: auto; }
       .period-tabs button { flex: 1; }
+      .stats-account-filter { width: 100%; max-width: none; }
       .drawer-tools { grid-template-columns: 1fr; }
       .operation-row { grid-template-columns: 42px minmax(0,1fr) auto 36px; }
     }
@@ -1071,6 +1073,10 @@
             <button type="button" data-period="year">Год</button>
           </div>
           <input id="period-date" type="date" aria-label="Опорная дата" style="width:150px">
+          <div class="field stats-account-filter">
+            <label for="statistics-account-filter">Счёт</label>
+            <select id="statistics-account-filter" aria-label="Фильтр статистики по счёту"></select>
+          </div>
         </div>
         <div class="stats-grid">
           <div class="panel chart-card">
@@ -1589,6 +1595,14 @@
         document.getElementById('transfer-to').innerHTML = state.accounts.length ? accountOptions : noAccount;
         document.getElementById('operation-account').innerHTML = state.accounts.length ? accountOptions : noAccount;
         document.getElementById('history-filter').innerHTML = `<option value="">Все счета</option>` + accountOptions;
+        const statisticsFilter = document.getElementById('statistics-account-filter');
+        const previousStatisticsAccount = statisticsFilter.value;
+        statisticsFilter.innerHTML = `<option value="">Все счета</option>` + state.accounts.map(account =>
+          `<option value="${escapeHtml(account.id)}">${escapeHtml(account.name)} (${escapeHtml(account.symbol)})</option>`
+        ).join('');
+        statisticsFilter.value = state.accounts.some(account => account.id === previousStatisticsAccount)
+          ? previousStatisticsAccount
+          : '';
         renderOperationCategoryOptions();
 
         if (state.accounts.length > 1) {
@@ -2031,9 +2045,14 @@
 
       function operationsInPeriod(type) {
         const [start, end] = periodRange();
+        const selectedAccountId = document.getElementById('statistics-account-filter').value;
         return state.operations.filter(operation => {
           if (operation.type !== type) return false;
-          if (accountById(operation.accountId)?.excludeFromTotal) return false;
+          if (selectedAccountId) {
+            if (operation.accountId !== selectedAccountId) return false;
+          } else if (accountById(operation.accountId)?.excludeFromTotal) {
+            return false;
+          }
           const date = new Date(`${operation.date}T12:00:00`);
           return date >= start && date < end;
         });
@@ -2127,6 +2146,7 @@
       });
       document.getElementById('period-date').value = todayInputValue();
       document.getElementById('period-date').addEventListener('change', renderStatistics);
+      document.getElementById('statistics-account-filter').addEventListener('change', renderStatistics);
       document.getElementById('operation-search').addEventListener('input', () => renderOperationHistory());
       document.getElementById('operation-history-type').addEventListener('change', () => renderOperationHistory());
       document.getElementById('menu-drawer').addEventListener('click', event => {
