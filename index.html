@@ -201,6 +201,23 @@
       background: rgba(255,255,255,.09);
     }
     .summary-label { color: rgba(255,255,255,.78); font-size: 14px; }
+    .summary-heading { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .balance-visibility {
+      flex: 0 0 40px;
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 1px solid rgba(255,255,255,.28);
+      border-radius: 13px;
+      background: rgba(255,255,255,.12);
+      color: #fff;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+    }
+    .balance-visibility svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .balance-visibility .eye-slash { display: none; }
+    .balance-visibility[aria-pressed="true"] .eye-slash { display: block; }
     .summary-values { position: relative; z-index: 1; margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px 22px; }
     .summary-value { font-size: 28px; font-weight: 800; letter-spacing: -.5px; }
     .summary-meta { margin-top: 9px; color: rgba(255,255,255,.72); font-size: 13px; }
@@ -852,6 +869,88 @@
       .operation-detail { overflow-wrap: anywhere; }
       .operation-amount { white-space: normal; text-align: right; overflow-wrap: anywhere; }
     }
+    @keyframes view-enter {
+      from { opacity: 0; transform: translateY(12px) scale(.992); filter: blur(3px); }
+      to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+    }
+    @keyframes card-enter {
+      from { opacity: 0; transform: translateY(14px) scale(.985); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes summary-orb {
+      from { transform: translate3d(0, 0, 0) scale(1); }
+      to { transform: translate3d(-18px, 14px, 0) scale(1.08); }
+    }
+    @keyframes summary-shine {
+      0%, 62% { transform: translateX(-115%) skewX(-18deg); opacity: 0; }
+      72% { opacity: .7; }
+      100% { transform: translateX(150%) skewX(-18deg); opacity: 0; }
+    }
+    @keyframes drawer-enter {
+      from { opacity: .6; transform: translateX(36px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes modal-enter {
+      from { opacity: 0; transform: translateY(20px) scale(.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes nav-enter {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .view.active { animation: view-enter .38s cubic-bezier(.2,.75,.25,1) both; }
+    .account-card { animation: card-enter .42s cubic-bezier(.2,.75,.25,1) both; }
+    .account-card:nth-child(2) { animation-delay: 45ms; }
+    .account-card:nth-child(3) { animation-delay: 90ms; }
+    .account-card:nth-child(4) { animation-delay: 135ms; }
+    .account-card:nth-child(5) { animation-delay: 180ms; }
+    .account-card:nth-child(6) { animation-delay: 225ms; }
+    .summary-card { isolation: isolate; }
+    .summary-card::before {
+      content: "";
+      position: absolute;
+      z-index: 0;
+      inset: -35% auto -35% -35%;
+      width: 38%;
+      pointer-events: none;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.14), transparent);
+      animation: summary-shine 8s ease-in-out infinite;
+    }
+    .summary-card::after { animation: summary-orb 7s ease-in-out infinite alternate; }
+    .summary-label, .summary-meta { position: relative; z-index: 1; }
+    .summary-values { animation: card-enter .45s .08s both; }
+    .btn, .nav-item, .theme-swatch, .menu-action, .category-delete,
+    .operation-delete, .modal-close, .breakdown-row {
+      transition: transform .18s cubic-bezier(.2,.75,.25,1), background-color .2s ease,
+        border-color .2s ease, box-shadow .2s ease, color .2s ease;
+    }
+    .btn:active, .theme-swatch:active, .menu-action:active,
+    .category-delete:active, .operation-delete:active, .modal-close:active {
+      transform: scale(.96);
+    }
+    .nav-item:active { transform: scale(.94); }
+    .nav-item.active { animation: nav-enter .22s ease-out both; }
+    .modal-backdrop.open .modal { animation: modal-enter .28s cubic-bezier(.2,.75,.25,1) both; }
+    .drawer-backdrop.open .drawer { animation: drawer-enter .3s cubic-bezier(.2,.75,.25,1) both; }
+    input, select, textarea {
+      transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
+    }
+    .theme-swatch.active { transform: scale(1.08); }
+    .breakdown-row:active { transform: scale(.99); }
+    :focus-visible { outline: 2px solid var(--primary); outline-offset: 3px; }
+    @media (hover: hover) {
+      .btn:hover, .menu-action:hover { transform: translateY(-1px); }
+      .theme-swatch:hover { transform: scale(1.08); }
+      .nav-item:hover { background-color: rgba(var(--accent-rgb), .08); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -908,7 +1007,16 @@
           <button class="btn btn-primary header-add-account" data-open-account aria-label="Добавить счёт">+</button>
         </div>
         <div class="summary-card">
-          <div class="summary-label">Общий баланс</div>
+          <div class="summary-heading">
+            <div class="summary-label">Общий баланс</div>
+            <button id="toggle-balances" class="balance-visibility" type="button" aria-label="Скрыть балансы" title="Скрыть балансы" aria-pressed="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M2.5 12s3.4-6 9.5-6 9.5 6 9.5 6-3.4 6-9.5 6-9.5-6-9.5-6Z"/>
+                <circle cx="12" cy="12" r="2.7"/>
+                <path class="eye-slash" d="M4 20 20 4"/>
+              </svg>
+            </button>
+          </div>
           <div id="summary-values" class="summary-values"></div>
           <div id="summary-meta" class="summary-meta"></div>
         </div>
@@ -1200,7 +1308,8 @@
               expenseCategories: Array.isArray(saved.expenseCategories) ? saved.expenseCategories : DEFAULT_EXPENSE_CATEGORIES,
               incomeCategories: Array.isArray(saved.incomeCategories) ? saved.incomeCategories : DEFAULT_INCOME_CATEGORIES,
               settings: {
-                themeColor: normalizeThemeColor(saved.settings?.themeColor)
+                themeColor: normalizeThemeColor(saved.settings?.themeColor),
+                hideBalances: saved.settings?.hideBalances === true
               }
             };
           }
@@ -1211,7 +1320,7 @@
           operations: [],
           expenseCategories: DEFAULT_EXPENSE_CATEGORIES,
           incomeCategories: DEFAULT_INCOME_CATEGORIES,
-          settings: { themeColor: DEFAULT_THEME_COLOR }
+          settings: { themeColor: DEFAULT_THEME_COLOR, hideBalances: false }
         };
       }
 
@@ -1220,6 +1329,7 @@
       }
 
       const money = (amount, symbol = '') => {
+        if (state.settings.hideBalances) return '*****';
         const value = Number(amount || 0).toLocaleString('ru-RU', {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2
@@ -1417,6 +1527,15 @@
         renderOperationHistory();
         renderTransferHistory();
         renderStatistics();
+        renderBalanceVisibility();
+      }
+
+      function renderBalanceVisibility() {
+        const hidden = state.settings.hideBalances;
+        const button = document.getElementById('toggle-balances');
+        button.setAttribute('aria-pressed', String(hidden));
+        button.setAttribute('aria-label', hidden ? 'Показать балансы' : 'Скрыть балансы');
+        button.title = hidden ? 'Показать балансы' : 'Скрыть балансы';
       }
 
       document.querySelectorAll('[data-view]').forEach(button => {
@@ -1509,6 +1628,8 @@
           document.getElementById('account-form').reset();
           document.getElementById('account-id').value = '';
           document.getElementById('account-balance').value = '0';
+          document.getElementById('account-balance').required = true;
+          document.getElementById('account-balance').placeholder = '';
           document.getElementById('account-exclude-from-total').checked = false;
           setAccountCurrency('BYN');
           document.getElementById('account-modal-title').textContent = 'Новый счёт';
@@ -1522,7 +1643,8 @@
           const account = accountById(adjustButton.dataset.adjust);
           if (!account) return;
           document.getElementById('adjust-account-id').value = account.id;
-          document.getElementById('adjust-balance').value = account.balance;
+          document.getElementById('adjust-balance').value = state.settings.hideBalances ? '' : account.balance;
+          document.getElementById('adjust-balance').placeholder = state.settings.hideBalances ? 'Скрыто' : '';
           document.getElementById('adjust-comment').value = '';
           document.getElementById('adjust-modal-title').textContent = `Баланс: ${account.name}`;
           openModal('adjust-modal');
@@ -1534,7 +1656,9 @@
           if (!account) return;
           document.getElementById('account-id').value = account.id;
           document.getElementById('account-name').value = account.name;
-          document.getElementById('account-balance').value = account.balance;
+          document.getElementById('account-balance').value = state.settings.hideBalances ? '' : account.balance;
+          document.getElementById('account-balance').required = !state.settings.hideBalances;
+          document.getElementById('account-balance').placeholder = state.settings.hideBalances ? 'Не изменять баланс' : '';
           setAccountCurrency(account.symbol);
           document.getElementById('account-exclude-from-total').checked = account.excludeFromTotal === true;
           document.getElementById('account-modal-title').textContent = 'Редактировать счёт';
@@ -1575,7 +1699,11 @@
         event.preventDefault();
         const id = document.getElementById('account-id').value;
         const name = document.getElementById('account-name').value.trim();
-        const balance = Number(document.getElementById('account-balance').value);
+        const balanceInput = document.getElementById('account-balance');
+        const existingAccount = id ? accountById(id) : null;
+        const balance = id && balanceInput.value === '' && existingAccount
+          ? Number(existingAccount.balance)
+          : Number(balanceInput.value);
         const symbol = document.getElementById('account-symbol').value.trim() || 'BYN';
         const excludeFromTotal = document.getElementById('account-exclude-from-total').checked;
         if (!name || !Number.isFinite(balance)) return;
@@ -1920,6 +2048,11 @@
       document.getElementById('theme-color-picker').addEventListener('input', event => {
         setThemeColor(event.target.value);
       });
+      document.getElementById('toggle-balances').addEventListener('click', () => {
+        state.settings.hideBalances = !state.settings.hideBalances;
+        saveState();
+        renderAll();
+      });
 
       document.getElementById('transfer-from').addEventListener('change', () => {
         const from = document.getElementById('transfer-from');
@@ -2001,7 +2134,10 @@
             operations: Array.isArray(imported.operations) ? imported.operations : [],
             expenseCategories: Array.isArray(imported.expenseCategories) ? imported.expenseCategories : DEFAULT_EXPENSE_CATEGORIES,
             incomeCategories: Array.isArray(imported.incomeCategories) ? imported.incomeCategories : DEFAULT_INCOME_CATEGORIES,
-            settings: { themeColor: normalizeThemeColor(imported.settings?.themeColor) }
+            settings: {
+              themeColor: normalizeThemeColor(imported.settings?.themeColor),
+              hideBalances: imported.settings?.hideBalances === true
+            }
           };
           applyThemeColor(state.settings.themeColor);
           saveState();
