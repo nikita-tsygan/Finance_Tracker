@@ -152,6 +152,15 @@
     .brand-mark svg { width: 25px; height: 25px; }
     .brand-name { font-size: 18px; font-weight: 800; letter-spacing: -.3px; }
     .desktop-actions { display: flex; gap: 8px; }
+    .header-add-account {
+      width: 44px;
+      min-width: 44px;
+      min-height: 44px;
+      padding: 0;
+      border-radius: 14px;
+      font-size: 24px;
+      line-height: 1;
+    }
 
     main { padding: 24px 0 40px; }
     .view { display: none; animation: fade .18s ease-out; }
@@ -257,11 +266,13 @@
     .panel-title { margin: 0 0 16px; font-size: 18px; }
 
     .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-    .field { display: flex; flex-direction: column; gap: 7px; }
+    .field { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
     .field.full { grid-column: 1 / -1; }
     label { color: #59647a; font-size: 13px; font-weight: 700; }
     input, select, textarea {
       width: 100%;
+      min-width: 0;
+      max-width: 100%;
       min-height: 48px;
       border: 1px solid var(--line);
       border-radius: 12px;
@@ -298,6 +309,12 @@
       -webkit-box-shadow: 0 0 0 1000px var(--surface-2) inset;
     }
     textarea { min-height: 88px; resize: vertical; }
+    input[type="date"] {
+      display: block;
+      min-width: 0;
+      width: 100%;
+      max-width: 100%;
+    }
     input::placeholder,
     textarea::placeholder {
       color: var(--muted);
@@ -704,6 +721,50 @@
     @media (max-width: 699px) {
       .bottom-nav { border-bottom: 1px solid rgba(255,255,255,.16); }
       .modal-actions { background: linear-gradient(180deg, transparent, rgba(27,30,25,.96) 20%); }
+      .desktop-actions { display: flex; }
+      .header-add-account {
+        width: 42px;
+        min-width: 42px;
+        min-height: 42px;
+      }
+      .form-grid > *,
+      .form-grid .field { min-width: 0; width: 100%; }
+      input[type="date"] { min-width: 0; width: 100%; max-width: 100%; }
+      .drawer {
+        width: 100%;
+        max-width: 100%;
+        padding: 0 14px calc(16px + env(safe-area-inset-bottom));
+        overscroll-behavior: contain;
+      }
+      .drawer > .modal-head {
+        position: sticky;
+        top: 0;
+        z-index: 3;
+        margin: 0 -14px 14px;
+        padding: 14px;
+        background: rgba(27,30,25,.92);
+        border-bottom: 1px solid rgba(255,255,255,.12);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+      }
+      .menu-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .menu-action { width: 100%; min-width: 0; min-height: 82px; padding: 12px; overflow-wrap: anywhere; }
+      .menu-action strong { line-height: 1.25; }
+      .menu-action span {
+        display: grid;
+        width: 30px;
+        height: 30px;
+        place-items: center;
+        border-radius: 10px;
+        background: rgba(170,179,148,.13);
+        color: var(--text);
+        font-size: 15px;
+      }
+      .menu-action[data-menu-settings] { grid-column: 1 / -1; min-height: 64px; }
+      .operation-row > * { min-width: 0; }
+      .operation-name,
+      .operation-detail { overflow-wrap: anywhere; }
+      .operation-amount { white-space: normal; text-align: right; overflow-wrap: anywhere; }
     }
   </style>
 </head>
@@ -722,7 +783,7 @@
           <div class="brand-name">Мои финансы</div>
         </div>
         <div class="desktop-actions">
-          <button class="btn btn-primary" data-open-account>+ Счёт</button>
+          <button class="btn btn-primary header-add-account" data-open-account aria-label="Добавить счёт">+</button>
         </div>
       </div>
     </header>
@@ -1106,7 +1167,7 @@
       function renderAccounts() {
         const grid = document.getElementById('accounts-grid');
         if (!state.accounts.length) {
-          grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">＋</div><strong>Счетов пока нет</strong><p>Создайте первый счёт для начала учета.</p><button class="btn btn-primary" data-open-account>Создать счёт</button></div>`;
+          grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">＋</div><strong>Счетов пока нет</strong><p>Нажмите «+» сверху, чтобы добавить счёт.</p></div>`;
         } else {
           grid.innerHTML = state.accounts.map(account => `
             <article class="account-card">
