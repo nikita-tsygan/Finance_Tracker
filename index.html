@@ -253,6 +253,39 @@
       text-align: center;
     }
     .account-actions .btn-icon { width: 40px; padding: 0; }
+    .account-aggregate-toggle {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface-2);
+      cursor: pointer;
+    }
+    .account-aggregate-toggle input[type="checkbox"] {
+      flex: 0 0 22px;
+      width: 22px;
+      min-width: 22px;
+      height: 22px;
+      min-height: 22px;
+      margin: 0;
+      padding: 0;
+      accent-color: var(--primary);
+    }
+    .account-aggregate-toggle span { display: block; min-width: 0; }
+    .account-aggregate-toggle strong { display: block; color: var(--text); }
+    .account-aggregate-toggle small { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; line-height: 1.4; }
+    .account-excluded-badge {
+      display: inline-flex;
+      margin-top: 7px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: var(--primary-soft);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+    }
 
     .panel {
       background: var(--surface);
@@ -1061,6 +1094,15 @@
               <option value="₸">KZT — тенге</option>
             </select>
           </div>
+          <div class="field full">
+            <label class="account-aggregate-toggle">
+              <input id="account-exclude-from-total" type="checkbox">
+              <span>
+                <strong>Не включать в общий баланс</strong>
+                <small>Баланс счёта сохранится, но не будет учитываться в сумме на главном экране.</small>
+              </span>
+            </label>
+          </div>
         </div>
         <div class="modal-actions">
           <button class="btn btn-secondary" type="button" data-close-modal>Отмена</button>
@@ -1301,6 +1343,7 @@
                   <div style="min-width:0">
                     <div class="account-name">${escapeHtml(account.name)}</div>
                     <div class="account-currency">${escapeHtml(account.symbol)}</div>
+                    ${account.excludeFromTotal ? `<div class="account-excluded-badge">Не в общем балансе</div>` : ''}
                   </div>
                 </div>
               </div>
@@ -1316,14 +1359,18 @@
 
         const totals = {};
         state.accounts.forEach(account => {
+          if (account.excludeFromTotal) return;
           totals[account.symbol] = (totals[account.symbol] || 0) + Number(account.balance);
         });
+        const excludedCount = state.accounts.filter(account => account.excludeFromTotal).length;
         const summaryValues = document.getElementById('summary-values');
         const symbols = Object.keys(totals);
         summaryValues.innerHTML = symbols.length
           ? symbols.map(symbol => `<div class="summary-value">${money(totals[symbol], symbol)}</div>`).join('')
-          : `<div class="summary-value">0.00</div>`;
-        document.getElementById('summary-meta').textContent = `${state.accounts.length} ${pluralAccounts(state.accounts.length)} · итоги сгруппированы по валютам`;
+          : `<div class="summary-value">${state.accounts.length ? '—' : '0.00'}</div>`;
+        document.getElementById('summary-meta').textContent = excludedCount
+          ? `${state.accounts.length} ${pluralAccounts(state.accounts.length)} · исключено из общего баланса: ${excludedCount}`
+          : `${state.accounts.length} ${pluralAccounts(state.accounts.length)} · итоги сгруппированы по валютам`;
       }
 
       function pluralAccounts(count) {
@@ -1462,6 +1509,7 @@
           document.getElementById('account-form').reset();
           document.getElementById('account-id').value = '';
           document.getElementById('account-balance').value = '0';
+          document.getElementById('account-exclude-from-total').checked = false;
           setAccountCurrency('BYN');
           document.getElementById('account-modal-title').textContent = 'Новый счёт';
           openModal('account-modal');
@@ -1488,6 +1536,7 @@
           document.getElementById('account-name').value = account.name;
           document.getElementById('account-balance').value = account.balance;
           setAccountCurrency(account.symbol);
+          document.getElementById('account-exclude-from-total').checked = account.excludeFromTotal === true;
           document.getElementById('account-modal-title').textContent = 'Редактировать счёт';
           openModal('account-modal');
         }
@@ -1528,6 +1577,7 @@
         const name = document.getElementById('account-name').value.trim();
         const balance = Number(document.getElementById('account-balance').value);
         const symbol = document.getElementById('account-symbol').value.trim() || 'BYN';
+        const excludeFromTotal = document.getElementById('account-exclude-from-total').checked;
         if (!name || !Number.isFinite(balance)) return;
 
         if (id) {
@@ -1549,10 +1599,11 @@
             }
             account.balance = balance;
             account.symbol = symbol;
+            account.excludeFromTotal = excludeFromTotal;
           }
           toast('Счёт сохранён');
         } else {
-          state.accounts.push({ id: uid(), name, balance, symbol, createdAt: new Date().toISOString() });
+          state.accounts.push({ id: uid(), name, balance, symbol, excludeFromTotal, createdAt: new Date().toISOString() });
           toast('Счёт создан');
         }
         saveState();
