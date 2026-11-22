@@ -496,6 +496,26 @@
     .settings-row:last-child { border-bottom: 0; }
     .settings-label strong { display: block; }
     .settings-label span { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
+    .theme-swatches { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px; }
+    .theme-swatch {
+      width: 42px;
+      height: 42px;
+      padding: 0;
+      border: 2px solid rgba(255,255,255,.25);
+      border-radius: 50%;
+      background: var(--swatch-color);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.3), 0 3px 12px rgba(0,0,0,.2);
+    }
+    .theme-swatch.active { outline: 2px solid var(--text); outline-offset: 3px; }
+    .theme-color-picker {
+      flex: 0 0 56px;
+      width: 56px !important;
+      min-width: 56px !important;
+      height: 44px !important;
+      min-height: 44px !important;
+      padding: 4px !important;
+      border-radius: 12px;
+    }
 
     @media (min-width: 700px) {
       .modal-backdrop { align-items: center; }
@@ -614,6 +634,10 @@
       --primary: #aab394;
       --primary-dark: #899576;
       --primary-soft: rgba(170, 179, 148, .15);
+      --accent-rgb: 170, 179, 148;
+      --accent-light: #b2bb9c;
+      --accent-dark: #7d896b;
+      --accent-contrast: #fff;
       --danger-soft: rgba(255, 114, 137, .14);
       --success: #a8c19a;
       --success-soft: rgba(168, 193, 154, .14);
@@ -621,9 +645,9 @@
     }
     body {
       background:
-        radial-gradient(ellipse at 12% 4%, rgba(153, 164, 125, .15), transparent 34rem),
-        radial-gradient(ellipse at 92% 38%, rgba(156, 142, 111, .09), transparent 30rem),
-        radial-gradient(ellipse at 48% 100%, rgba(103, 116, 82, .11), transparent 36rem),
+        radial-gradient(ellipse at 12% 4%, rgba(var(--accent-rgb), .15), transparent 34rem),
+        radial-gradient(ellipse at 92% 38%, rgba(var(--accent-rgb), .08), transparent 30rem),
+        radial-gradient(ellipse at 48% 100%, rgba(var(--accent-rgb), .1), transparent 36rem),
         var(--bg);
       background-attachment: fixed;
     }
@@ -634,16 +658,19 @@
       -webkit-backdrop-filter: blur(28px) saturate(180%);
     }
     .brand-mark {
+      background: linear-gradient(145deg, var(--accent-light), var(--accent-dark));
       border: 1px solid rgba(255,255,255,.32);
-      box-shadow: 0 8px 26px rgba(124, 137, 96, .25), inset 0 1px 0 rgba(255,255,255,.4);
+      box-shadow: 0 8px 26px rgba(var(--accent-rgb), .25), inset 0 1px 0 rgba(255,255,255,.4);
     }
+    .brand-mark svg path:nth-of-type(2) { stroke: var(--accent-light); }
+    .brand-mark svg circle { fill: var(--accent-light); }
     .account-card,
     .panel,
     .menu-action,
     .period-tabs,
     .segmented {
       background:
-        linear-gradient(145deg, rgba(255,255,255,.085), rgba(255,255,255,.018) 48%, rgba(130,145,255,.045)),
+        linear-gradient(145deg, rgba(255,255,255,.085), rgba(255,255,255,.018) 48%, rgba(var(--accent-rgb),.045)),
         rgba(29, 32, 27, .76);
       border-color: rgba(232, 238, 255, .15);
       box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,.13);
@@ -663,9 +690,9 @@
     .summary-card {
       background:
         radial-gradient(ellipse at 85% 0%, rgba(255,255,255,.32), transparent 42%),
-        linear-gradient(135deg, rgba(133,145,108,.94), rgba(78,88,66,.92));
+        linear-gradient(135deg, rgba(var(--accent-rgb),.94), var(--accent-dark));
       border: 1px solid rgba(255,255,255,.28);
-      box-shadow: 0 22px 48px rgba(71, 79, 56, .28), inset 0 1px 0 rgba(255,255,255,.34);
+      box-shadow: 0 22px 48px rgba(var(--accent-rgb), .28), inset 0 1px 0 rgba(255,255,255,.34);
       backdrop-filter: blur(22px) saturate(160%);
       -webkit-backdrop-filter: blur(22px) saturate(160%);
     }
@@ -684,8 +711,8 @@
     }
     input:focus, select:focus, textarea:focus {
       background: rgba(7, 11, 23, .62);
-      border-color: rgba(190, 199, 157, .68);
-      box-shadow: 0 0 0 4px rgba(170, 179, 148, .14), inset 0 1px 0 rgba(255,255,255,.06);
+      border-color: rgba(var(--accent-rgb), .68);
+      box-shadow: 0 0 0 4px rgba(var(--accent-rgb), .14), inset 0 1px 0 rgba(255,255,255,.06);
     }
     .btn-secondary,
     .modal-close,
@@ -696,10 +723,11 @@
       box-shadow: inset 0 1px 0 rgba(255,255,255,.1);
     }
     .btn-primary {
-      background: linear-gradient(135deg, #b2bb9c, #7d896b);
-      box-shadow: 0 8px 20px rgba(111, 124, 82, .22), inset 0 1px 0 rgba(255,255,255,.3);
+      color: var(--accent-contrast);
+      background: linear-gradient(135deg, var(--accent-light), var(--accent-dark));
+      box-shadow: 0 8px 20px rgba(var(--accent-rgb), .22), inset 0 1px 0 rgba(255,255,255,.3);
     }
-    .btn-primary:hover { background: linear-gradient(135deg, #c0c8ac, #899576); }
+    .btn-primary:hover { background: linear-gradient(135deg, var(--accent-light), var(--primary-dark)); }
     .btn-danger { border: 1px solid rgba(255,114,137,.16); }
     .bottom-nav {
       background: rgba(29, 32, 27, .72);
@@ -710,7 +738,7 @@
     }
     .nav-item.active {
       color: #fff;
-      background: linear-gradient(145deg, rgba(190,199,157,.26), rgba(126,140,99,.13));
+      background: linear-gradient(145deg, rgba(var(--accent-rgb),.26), rgba(var(--accent-rgb),.13));
       box-shadow: inset 0 1px 0 rgba(255,255,255,.17), 0 4px 14px rgba(0,0,0,.12);
     }
     .modal-backdrop,
@@ -735,9 +763,9 @@
     }
     .period-tabs button.active,
     .period-tabs button.active:hover {
-      background: linear-gradient(135deg, #b2bb9c, #7d896b);
-      color: #fff;
-      box-shadow: 0 5px 16px rgba(111,124,82,.2), inset 0 1px 0 rgba(255,255,255,.3);
+      background: linear-gradient(135deg, var(--accent-light), var(--accent-dark));
+      color: var(--accent-contrast);
+      box-shadow: 0 5px 16px rgba(var(--accent-rgb),.2), inset 0 1px 0 rgba(255,255,255,.3);
     }
     .history-item,
     .operation-row,
@@ -781,7 +809,7 @@
         height: 30px;
         place-items: center;
         border-radius: 10px;
-        background: rgba(170,179,148,.13);
+        background: rgba(var(--accent-rgb),.13);
         color: var(--text);
         font-size: 15px;
       }
@@ -951,6 +979,21 @@
           <div><h1>Настройки</h1><p>Данные приложения</p></div>
         </div>
         <div class="panel">
+          <h2 class="panel-title">Цвет интерфейса</h2>
+          <p class="history-detail" style="margin-top:-8px;margin-bottom:14px">Выберите акцентный цвет приложения.</p>
+          <div id="theme-swatches" class="theme-swatches" role="group" aria-label="Готовые цвета интерфейса">
+            <button type="button" class="theme-swatch" data-theme-color="#aab394" style="--swatch-color:#aab394" aria-label="Шалфейный" title="Шалфейный"></button>
+            <button type="button" class="theme-swatch" data-theme-color="#bd8267" style="--swatch-color:#bd8267" aria-label="Терракотовый" title="Терракотовый"></button>
+            <button type="button" class="theme-swatch" data-theme-color="#c0a26e" style="--swatch-color:#c0a26e" aria-label="Песочный" title="Песочный"></button>
+            <button type="button" class="theme-swatch" data-theme-color="#9a82a0" style="--swatch-color:#9a82a0" aria-label="Сливовый" title="Сливовый"></button>
+            <button type="button" class="theme-swatch" data-theme-color="#788d83" style="--swatch-color:#788d83" aria-label="Эвкалиптовый" title="Эвкалиптовый"></button>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label"><strong>Свой цвет</strong><span>Настройте акцент самостоятельно</span></div>
+            <input id="theme-color-picker" class="theme-color-picker" type="color" value="#aab394" aria-label="Выбрать цвет интерфейса">
+          </div>
+        </div>
+        <div class="panel">
           <h2 class="panel-title">Категории расходов</h2>
           <div id="expense-categories" class="category-grid"></div>
           <form id="expense-category-form" class="form-grid" style="margin-top:12px">
@@ -1084,6 +1127,7 @@
   <script>
     (() => {
       const STORAGE_KEY = 'finance-tracker-v1';
+      const DEFAULT_THEME_COLOR = '#aab394';
       const DEFAULT_EXPENSE_CATEGORIES = [
         { id: 'expense-food', name: 'Еда', color: '#ff7289' },
         { id: 'expense-transport', name: 'Транспорт', color: '#ffb86b' },
@@ -1112,7 +1156,10 @@
               transactions: Array.isArray(saved.transactions) ? saved.transactions : [],
               operations: Array.isArray(saved.operations) ? saved.operations : [],
               expenseCategories: Array.isArray(saved.expenseCategories) ? saved.expenseCategories : DEFAULT_EXPENSE_CATEGORIES,
-              incomeCategories: Array.isArray(saved.incomeCategories) ? saved.incomeCategories : DEFAULT_INCOME_CATEGORIES
+              incomeCategories: Array.isArray(saved.incomeCategories) ? saved.incomeCategories : DEFAULT_INCOME_CATEGORIES,
+              settings: {
+                themeColor: normalizeThemeColor(saved.settings?.themeColor)
+              }
             };
           }
         } catch (_) {}
@@ -1121,7 +1168,8 @@
           transactions: [],
           operations: [],
           expenseCategories: DEFAULT_EXPENSE_CATEGORIES,
-          incomeCategories: DEFAULT_INCOME_CATEGORIES
+          incomeCategories: DEFAULT_INCOME_CATEGORIES,
+          settings: { themeColor: DEFAULT_THEME_COLOR }
         };
       }
 
@@ -1143,6 +1191,59 @@
         .replaceAll('>', '&gt;')
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#039;');
+
+      function normalizeThemeColor(color) {
+        return typeof color === 'string' && /^#[\da-f]{6}$/i.test(color)
+          ? color.toLowerCase()
+          : DEFAULT_THEME_COLOR;
+      }
+
+      function colorRgb(color) {
+        const normalized = normalizeThemeColor(color);
+        return [1, 3, 5].map(index => parseInt(normalized.slice(index, index + 2), 16));
+      }
+
+      function mixColor(rgb, amount, target) {
+        return rgb.map(channel => Math.round(channel + (target - channel) * amount));
+      }
+
+      function rgbHex(rgb) {
+        return `#${rgb.map(channel => channel.toString(16).padStart(2, '0')).join('')}`;
+      }
+
+      function relativeLuminance(rgb) {
+        const channels = rgb.map(channel => {
+          const value = channel / 255;
+          return value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4;
+        });
+        return .2126 * channels[0] + .7152 * channels[1] + .0722 * channels[2];
+      }
+
+      function applyThemeColor(color) {
+        const normalized = normalizeThemeColor(color);
+        const rgb = colorRgb(normalized);
+        const luminance = relativeLuminance(rgb);
+        const root = document.documentElement;
+        root.style.setProperty('--primary', normalized);
+        root.style.setProperty('--primary-dark', rgbHex(mixColor(rgb, .2, 0)));
+        root.style.setProperty('--primary-soft', `rgba(${rgb.join(', ')}, .15)`);
+        root.style.setProperty('--accent-rgb', rgb.join(', '));
+        root.style.setProperty('--accent-light', rgbHex(mixColor(rgb, .2, 255)));
+        root.style.setProperty('--accent-dark', rgbHex(mixColor(rgb, .25, 0)));
+        root.style.setProperty('--accent-contrast', luminance > .42 ? '#171912' : '#ffffff');
+        document.getElementById('theme-color-picker').value = normalized;
+        document.querySelectorAll('[data-theme-color]').forEach(button => {
+          const selected = button.dataset.themeColor === normalized;
+          button.classList.toggle('active', selected);
+          button.setAttribute('aria-pressed', String(selected));
+        });
+      }
+
+      function setThemeColor(color) {
+        state.settings.themeColor = normalizeThemeColor(color);
+        applyThemeColor(state.settings.themeColor);
+        saveState();
+      }
 
       const uid = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
 
@@ -1759,6 +1860,15 @@
       document.getElementById('menu-drawer').addEventListener('click', event => {
         if (event.target.id === 'menu-drawer') event.currentTarget.classList.remove('open');
       });
+      document.querySelectorAll('[data-theme-color]').forEach(button => {
+        button.addEventListener('click', () => {
+          setThemeColor(button.dataset.themeColor);
+          toast('Цвет интерфейса изменён');
+        });
+      });
+      document.getElementById('theme-color-picker').addEventListener('input', event => {
+        setThemeColor(event.target.value);
+      });
 
       document.getElementById('transfer-from').addEventListener('change', () => {
         const from = document.getElementById('transfer-from');
@@ -1839,8 +1949,10 @@
             transactions: imported.transactions,
             operations: Array.isArray(imported.operations) ? imported.operations : [],
             expenseCategories: Array.isArray(imported.expenseCategories) ? imported.expenseCategories : DEFAULT_EXPENSE_CATEGORIES,
-            incomeCategories: Array.isArray(imported.incomeCategories) ? imported.incomeCategories : DEFAULT_INCOME_CATEGORIES
+            incomeCategories: Array.isArray(imported.incomeCategories) ? imported.incomeCategories : DEFAULT_INCOME_CATEGORIES,
+            settings: { themeColor: normalizeThemeColor(imported.settings?.themeColor) }
           };
+          applyThemeColor(state.settings.themeColor);
           saveState();
           renderAll();
           toast('Данные импортированы');
@@ -1853,6 +1965,7 @@
 
       document.getElementById('transfer-date').value = todayInputValue();
       document.getElementById('operation-date').value = todayInputValue();
+      applyThemeColor(state.settings.themeColor);
       renderAll();
     })();
   </script>
