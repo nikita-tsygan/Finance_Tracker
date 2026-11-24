@@ -235,8 +235,39 @@
       border-radius: var(--radius);
       padding: 18px;
       box-shadow: var(--shadow);
+      transition: transform .16s ease, opacity .16s ease, border-color .16s ease;
+    }
+    .account-card.account-dragging {
+      opacity: .72;
+      transform: scale(.98);
+      border-color: var(--primary);
+      z-index: 2;
     }
     .account-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+    .account-drag-handle {
+      flex: 0 0 36px;
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      margin: -6px -6px 0 4px;
+      padding: 0;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--muted);
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .account-drag-handle:active { cursor: grabbing; }
+    .account-drag-handle svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+      pointer-events: none;
+    }
     .account-name-wrap { display: flex; align-items: center; gap: 10px; min-width: 0; }
     .account-icon {
       flex: 0 0 auto;
@@ -1809,7 +1840,7 @@
           grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><strong>Счетов пока нет</strong></div>`;
         } else {
           grid.innerHTML = state.accounts.map(account => `
-            <article class="account-card">
+            <article class="account-card" data-account-id="${escapeHtml(account.id)}">
               <div class="account-top">
                 <div class="account-name-wrap">
                   <div class="account-icon">${escapeHtml(account.symbol.slice(0, 1) || '₽')}</div>
@@ -1819,6 +1850,9 @@
                     ${account.excludeFromTotal ? `<div class="account-excluded-badge">Не в общем балансе</div>` : ''}
                   </div>
                 </div>
+                <button class="account-drag-handle" type="button" aria-label="Изменить порядок счёта" title="Перетащить счёт">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="6" r="1.8"/><circle cx="16" cy="6" r="1.8"/><circle cx="8" cy="12" r="1.8"/><circle cx="16" cy="12" r="1.8"/><circle cx="8" cy="18" r="1.8"/><circle cx="16" cy="18" r="1.8"/></svg>
+                </button>
               </div>
               <div class="account-balance">${money(account.balance, account.symbol)}</div>
               <div class="account-actions">
@@ -1844,6 +1878,73 @@
         document.getElementById('summary-meta').textContent = excludedCount
           ? `${state.accounts.length} ${pluralAccounts(state.accounts.length)} · исключено из общего баланса: ${excludedCount}`
           : `${state.accounts.length} ${pluralAccounts(state.accounts.length)} · итоги сгруппированы по валютам`;
+        initAccountDragAndDrop(grid);
+      }
+
+      function initAccountDragAndDrop(grid) {
+        grid.querySelectorAll('.account-drag-handle').forEach(handle => {
+          handle.addEventListener('pointerdown', event => {
+            if (event.button !== undefined && event.button !== 0) return;
+            const draggedCard = handle.closest('.account-card');
+            if (!draggedCard) return;
+
+            event.preventDefault();
+            let changed = false;
+            draggedCard.classList.add('account-dragging');
+            handle.setPointerCapture?.(event.pointerId);
+
+            const moveCard = pointerEvent => {
+              pointerEvent.preventDefault();
+              const cards = Array.from(grid.querySelectorAll('.account-card'))
+                .filter(card => card !== draggedCard);
+              if (!cards.length) return;
+
+              let targetCard = cards[0];
+              let nearestDistance = Infinity;
+              cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const distance = (pointerEvent.clientX - centerX) ** 2 + (pointerEvent.clientY - centerY) ** 2;
+                if (distance < nearestDistance) {
+                  nearestDistance = distance;
+                  targetCard = card;
+                }
+              });
+
+              const targetRect = targetCard.getBoundingClientRect();
+              const insertAfter = pointerEvent.clientX > targetRect.left + targetRect.width / 2
+                || pointerEvent.clientY > targetRect.top + targetRect.height;
+              const referenceNode = insertAfter ? targetCard.nextElementSibling : targetCard;
+              if (referenceNode !== draggedCard && draggedCard.nextElementSibling !== referenceNode) {
+                grid.insertBefore(draggedCard, referenceNode);
+                changed = true;
+              }
+            };
+
+            const finishDrag = () => {
+              handle.removeEventListener('pointermove', moveCard);
+              handle.removeEventListener('pointerup', finishDrag);
+              handle.removeEventListener('pointercancel', finishDrag);
+              draggedCard.classList.remove('account-dragging');
+
+              if (changed) {
+                const accountIds = Array.from(grid.querySelectorAll('.account-card'))
+                  .map(card => card.dataset.accountId);
+                const accountsById = new Map(state.accounts.map(account => [String(account.id), account]));
+                state.accounts = accountIds
+                  .map(id => accountsById.get(id))
+                  .filter(Boolean);
+                saveState();
+                toast('Порядок счетов сохранён');
+              }
+            };
+
+            handle.addEventListener('pointermove', moveCard);
+            handle.addEventListener('pointerup', finishDrag);
+            handle.addEventListener('pointercancel', finishDrag);
+          });
+        });
       }
 
       function pluralAccounts(count) {
